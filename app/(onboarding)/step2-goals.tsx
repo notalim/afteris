@@ -15,6 +15,8 @@ const GOAL_OPTIONS: GoalOption[] = [
   'Longevity',
   'Sleep & Recovery',
   'Cognitive Performance',
+  'Focus & Clarity',
+  'Looksmaxxing',
   'Just Exploring',
 ];
 

@@ -14,8 +14,8 @@ export const Colors = {
 } as const;
 
 export const Fonts = {
-  heading: 'Lora_400Regular',
-  headingBold: 'Lora_700Bold',
+  heading: 'PlayfairDisplay_400Regular',
+  headingBold: 'PlayfairDisplay_700Bold',
   body: 'Inter_400Regular',
   bodyMedium: 'Inter_500Medium',
   bodySemiBold: 'Inter_600SemiBold',

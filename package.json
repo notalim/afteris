@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
-    "@expo-google-fonts/lora": "^0.4.2",
+    "@expo-google-fonts/playfair-display": "^0.4.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/native": "^7.1.8",
     "expo": "^54.0.0",
@@ -42,7 +42,9 @@
   "private": true,
   "expo": {
     "install": {
-      "exclude": ["@react-navigation/native"]
+      "exclude": [
+        "@react-navigation/native"
+      ]
     }
   }
 }

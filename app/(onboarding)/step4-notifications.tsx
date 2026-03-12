@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -10,30 +10,50 @@ import { Button } from '@/components/ui/Button';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { MascotBlock } from '@/components/ui/MascotBlock';
 
-type TimePreset = 'morning' | 'midday' | 'evening' | 'custom';
+type TimePreset = 'morning' | 'afternoon' | 'evening' | 'custom';
 
 interface PresetOption {
   key: TimePreset;
   label: string;
   time: string;
+  display: string;
 }
 
 const TIME_PRESETS: PresetOption[] = [
-  { key: 'morning', label: 'Morning', time: '08:00' },
-  { key: 'midday', label: 'Midday', time: '12:00' },
-  { key: 'evening', label: 'Evening', time: '18:00' },
-  { key: 'custom', label: 'Custom', time: '' },
+  { key: 'morning', label: 'Morning', time: '08:00', display: '8 AM' },
+  { key: 'afternoon', label: 'Afternoon', time: '12:00', display: '12 PM' },
+  { key: 'evening', label: 'Evening', time: '18:00', display: '6 PM' },
+  { key: 'custom', label: 'Custom', time: '', display: '' },
+];
+
+const CUSTOM_TIME_OPTIONS = [
+  { label: '6:00 AM', value: '06:00' },
+  { label: '7:00 AM', value: '07:00' },
+  { label: '8:00 AM', value: '08:00' },
+  { label: '9:00 AM', value: '09:00' },
+  { label: '10:00 AM', value: '10:00' },
+  { label: '11:00 AM', value: '11:00' },
+  { label: '12:00 PM', value: '12:00' },
+  { label: '1:00 PM', value: '13:00' },
+  { label: '2:00 PM', value: '14:00' },
+  { label: '3:00 PM', value: '15:00' },
+  { label: '4:00 PM', value: '16:00' },
+  { label: '5:00 PM', value: '17:00' },
+  { label: '6:00 PM', value: '18:00' },
+  { label: '7:00 PM', value: '19:00' },
+  { label: '8:00 PM', value: '20:00' },
+  { label: '9:00 PM', value: '21:00' },
+  { label: '10:00 PM', value: '22:00' },
 ];
 
 export default function Step4Notifications() {
   const router = useRouter();
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [selectedPreset, setSelectedPreset] = useState<TimePreset>('morning');
-  const [customHour, setCustomHour] = useState('09');
-  const [customMinute, setCustomMinute] = useState('00');
+  const [customTime, setCustomTime] = useState('09:00');
 
   const getReminderTime = (): string => {
-    if (selectedPreset === 'custom') return `${customHour}:${customMinute}`;
+    if (selectedPreset === 'custom') return customTime;
     const preset = TIME_PRESETS.find((p) => p.key === selectedPreset);
     return preset?.time ?? '09:00';
   };
@@ -60,7 +80,7 @@ export default function Step4Notifications() {
         <ProgressBar progress={4 / 7} style={styles.progress} />
       </View>
 
-      <View style={styles.content}>
+      <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollInner}>
         <Text style={styles.heading}>Never miss a dose.</Text>
 
         <MascotBlock text="I'll remind you — promise! 🧡" style={styles.mascot} />
@@ -97,18 +117,14 @@ export default function Step4Notifications() {
                   >
                     {preset.label}
                   </Text>
-                  {preset.key !== 'custom' && (
+                  {preset.display !== '' && (
                     <Text
                       style={[
                         styles.presetTime,
                         selectedPreset === preset.key && styles.presetTimeSelected,
                       ]}
                     >
-                      {preset.key === 'morning'
-                        ? '8 AM'
-                        : preset.key === 'midday'
-                        ? '12 PM'
-                        : '6 PM'}
+                      {preset.display}
                     </Text>
                   )}
                 </TouchableOpacity>
@@ -116,31 +132,39 @@ export default function Step4Notifications() {
             </View>
 
             {selectedPreset === 'custom' && (
-              <View style={styles.customTimeRow}>
-                <TextInput
-                  style={styles.timeInput}
-                  value={customHour}
-                  onChangeText={(t) => setCustomHour(t.replace(/[^0-9]/g, '').slice(0, 2))}
-                  keyboardType="numeric"
-                  placeholder="HH"
-                  placeholderTextColor={Colors.textSecondary}
-                  maxLength={2}
-                />
-                <Text style={styles.timeSeparator}>:</Text>
-                <TextInput
-                  style={styles.timeInput}
-                  value={customMinute}
-                  onChangeText={(t) => setCustomMinute(t.replace(/[^0-9]/g, '').slice(0, 2))}
-                  keyboardType="numeric"
-                  placeholder="MM"
-                  placeholderTextColor={Colors.textSecondary}
-                  maxLength={2}
-                />
+              <View style={styles.customSection}>
+                <Text style={styles.customLabel}>Pick a time</Text>
+                <View style={styles.customGrid}>
+                  {CUSTOM_TIME_OPTIONS.map((opt) => (
+                    <TouchableOpacity
+                      key={opt.value}
+                      onPress={() => setCustomTime(opt.value)}
+                      activeOpacity={0.7}
+                      style={[
+                        styles.timeChip,
+                        customTime === opt.value && styles.timeChipSelected,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.timeChipText,
+                          customTime === opt.value && styles.timeChipTextSelected,
+                        ]}
+                      >
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
             )}
+
+            <Text style={styles.changeLaterHint}>
+              You can always change this later in Settings.
+            </Text>
           </View>
         )}
-      </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Button title="Continue →" onPress={handleContinue} />
@@ -167,10 +191,13 @@ const styles = StyleSheet.create({
   progress: {
     flex: 1,
   },
-  content: {
+  scrollContent: {
     flex: 1,
+  },
+  scrollInner: {
     paddingHorizontal: Spacing.xxl,
     paddingTop: Spacing.xxxl,
+    paddingBottom: Spacing.xxl,
   },
   heading: {
     ...Typography.h1,
@@ -239,29 +266,47 @@ const styles = StyleSheet.create({
   presetTimeSelected: {
     color: Colors.primary,
   },
-  customTimeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
+  customSection: {
     marginTop: Spacing.md,
+    gap: Spacing.sm,
   },
-  timeInput: {
-    width: 64,
-    backgroundColor: Colors.surface,
+  customLabel: {
+    fontFamily: Fonts.bodyMedium,
+    fontSize: 13,
+    color: Colors.textSecondary,
+  },
+  customGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  timeChip: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.pill,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.input,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    fontFamily: Fonts.bodyMedium,
-    fontSize: 18,
-    color: Colors.textPrimary,
-    textAlign: 'center',
+    backgroundColor: Colors.white,
   },
-  timeSeparator: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: 20,
+  timeChipSelected: {
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.primary,
+  },
+  timeChipText: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
     color: Colors.textPrimary,
+  },
+  timeChipTextSelected: {
+    color: Colors.primary,
+    fontFamily: Fonts.bodySemiBold,
+  },
+  changeLaterHint: {
+    fontFamily: Fonts.body,
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginTop: Spacing.md,
+    fontStyle: 'italic',
   },
   footer: {
     paddingHorizontal: Spacing.xxl,

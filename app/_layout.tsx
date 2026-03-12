@@ -1,32 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import {
-  Lora_400Regular,
-  Lora_700Bold,
-} from '@expo-google-fonts/lora';
+  PlayfairDisplay_400Regular,
+  PlayfairDisplay_700Bold,
+} from '@expo-google-fonts/playfair-display';
 import {
   Inter_400Regular,
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initializeDatabase } from '@/db/schema';
+import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
+import { useState } from 'react';
 import 'react-native-reanimated';
 
 export { ErrorBoundary } from 'expo-router';
 
 SplashScreen.preventAutoHideAsync();
 
-const ONBOARDING_KEY = 'hasCompletedOnboarding';
-
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Lora_400Regular,
-    Lora_700Bold,
+    PlayfairDisplay_400Regular,
+    PlayfairDisplay_700Bold,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
@@ -34,21 +33,15 @@ export default function RootLayout() {
   });
 
   const [dbReady, setDbReady] = useState(false);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
 
   useEffect(() => {
     async function init() {
       try {
         await initializeDatabase();
-        setDbReady(true);
-
-        const value = await AsyncStorage.getItem(ONBOARDING_KEY);
-        setHasCompletedOnboarding(value === 'true');
       } catch (e) {
-        console.error('Initialization error:', e);
-        setDbReady(true);
-        setHasCompletedOnboarding(false);
+        console.error('DB init error:', e);
       }
+      setDbReady(true);
     }
     init();
   }, []);
@@ -57,13 +50,7 @@ export default function RootLayout() {
     if (fontError) throw fontError;
   }, [fontError]);
 
-  useEffect(() => {
-    if (fontsLoaded && dbReady && hasCompletedOnboarding !== null) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, dbReady, hasCompletedOnboarding]);
-
-  if (!fontsLoaded || !dbReady || hasCompletedOnboarding === null) {
+  if (!fontsLoaded || !dbReady) {
     return (
       <View style={loadingStyles.container}>
         <Text style={loadingStyles.text}>Afteris</Text>
@@ -71,7 +58,11 @@ export default function RootLayout() {
     );
   }
 
-  return <RootLayoutNav hasCompletedOnboarding={hasCompletedOnboarding} />;
+  return (
+    <OnboardingProvider>
+      <RootLayoutNav />
+    </OnboardingProvider>
+  );
 }
 
 const loadingStyles = StyleSheet.create({
@@ -88,11 +79,14 @@ const loadingStyles = StyleSheet.create({
   },
 });
 
-function RootLayoutNav({ hasCompletedOnboarding }: { hasCompletedOnboarding: boolean }) {
+function RootLayoutNav() {
   const router = useRouter();
   const segments = useSegments();
+  const { hasCompletedOnboarding } = useOnboarding();
 
   useEffect(() => {
+    if (hasCompletedOnboarding === null) return;
+
     const inOnboarding = segments[0] === '(onboarding)';
 
     if (!hasCompletedOnboarding && !inOnboarding) {
@@ -101,6 +95,20 @@ function RootLayoutNav({ hasCompletedOnboarding }: { hasCompletedOnboarding: boo
       router.replace('/(tabs)');
     }
   }, [hasCompletedOnboarding, segments, router]);
+
+  useEffect(() => {
+    if (hasCompletedOnboarding !== null) {
+      SplashScreen.hideAsync();
+    }
+  }, [hasCompletedOnboarding]);
+
+  if (hasCompletedOnboarding === null) {
+    return (
+      <View style={loadingStyles.container}>
+        <Text style={loadingStyles.text}>Afteris</Text>
+      </View>
+    );
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

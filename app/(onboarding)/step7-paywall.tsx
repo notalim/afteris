@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { createUser, getUser, updateUser } from '@/db/queries';
+import { useOnboarding } from '@/contexts/OnboardingContext';
 
 type PricingPlan = 'monthly' | 'annual';
 
@@ -20,6 +21,7 @@ const VALUE_POINTS = [
 
 export default function Step7Paywall() {
   const router = useRouter();
+  const { completeOnboarding: markOnboardingComplete } = useOnboarding();
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan>('annual');
 
   const completeOnboarding = async () => {
@@ -54,8 +56,8 @@ export default function Step7Paywall() {
         has_completed_onboarding: 1,
       });
 
-      // Set AsyncStorage flag and clean up temp keys
-      await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+      // Set context + AsyncStorage flag and clean up temp keys
+      await markOnboardingComplete();
       await AsyncStorage.multiRemove([
         'onboarding_name',
         'onboarding_goals',
@@ -65,7 +67,7 @@ export default function Step7Paywall() {
       ]);
     } catch (e) {
       console.log('Error saving onboarding state:', e);
-      await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+      await markOnboardingComplete();
     }
   };
 

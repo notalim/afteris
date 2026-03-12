@@ -1,12 +1,38 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Colors, Fonts, Spacing, BorderRadius, Typography } from '@/constants/theme';
+import { Colors, Fonts, Spacing, Typography } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
+import { useOnboarding } from '@/contexts/OnboardingContext';
+import { getUser, createUser, updateUser } from '@/db/queries';
 
 export default function Step1Welcome() {
   const router = useRouter();
+  const { skipToApp } = useOnboarding();
+
+  const handleDevSkip = async () => {
+    try {
+      // Create a default user profile so the app doesn't crash
+      const existingUser = await getUser();
+      if (!existingUser) {
+        await createUser('Dev User', ['Just Exploring'], 'calm');
+      }
+      await updateUser({
+        name: 'Dev User',
+        goals: JSON.stringify(['Just Exploring']),
+        artie_mode: 'calm',
+        reminder_enabled: 0,
+        reminder_time: '09:00',
+        has_completed_onboarding: 1,
+      });
+      // Update context + AsyncStorage, which triggers the routing guard
+      await skipToApp();
+    } catch (e) {
+      console.log('Dev skip error:', e);
+      Alert.alert('Error', 'Could not skip onboarding');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,6 +60,14 @@ export default function Step1Welcome() {
 
         <TouchableOpacity style={styles.ghostLink} activeOpacity={0.7}>
           <Text style={styles.ghostLinkText}>Already have an account? Sign in</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.devSkip}
+          activeOpacity={0.6}
+          onPress={handleDevSkip}
+        >
+          <Text style={styles.devSkipText}>Dev: Skip to App</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -99,5 +133,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: 14,
     color: Colors.primary,
+  },
+  devSkip: {
+    padding: Spacing.xs,
+    opacity: 0.4,
+  },
+  devSkipText: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    color: Colors.textSecondary,
   },
 });
