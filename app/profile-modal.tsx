@@ -5,11 +5,13 @@ import {
   ScrollView,
   Alert,
   StyleSheet,
+  TouchableOpacity,
   ViewStyle,
   TextStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, BorderRadius, Typography } from '@/constants/theme';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -17,9 +19,12 @@ import { MascotBlock } from '@/components/ui/MascotBlock';
 import { SettingsRow } from '@/components/profile/SettingsRow';
 import { getUser, getCompounds, getStreak } from '@/db/queries';
 import { useInjectionLog } from '@/hooks/useInjectionLog';
+import { useOnboarding } from '@/contexts/OnboardingContext';
 import type { User } from '@/types';
 
-export default function ProfileScreen() {
+export default function ProfileModal() {
+  const router = useRouter();
+  const { resetOnboarding } = useOnboarding();
   const [user, setUser] = useState<User | null>(null);
   const [totalLogs, setTotalLogs] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -38,7 +43,6 @@ export default function ProfileScreen() {
         const compounds = await getCompounds(true);
         setCompoundCount(compounds.length);
 
-        // Get total log count by fetching a wide range
         const logs = await fetchBetweenDates('2020-01-01', '2099-12-31');
         setTotalLogs(logs?.length ?? 0);
       })();
@@ -52,13 +56,37 @@ export default function ProfileScreen() {
         ? 'Nerdy'
         : 'Calm';
 
+  const handleRerunOnboarding = () => {
+    Alert.alert(
+      'Re-run Onboarding',
+      'This will restart the onboarding flow. Your data will be preserved.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Re-run',
+          onPress: async () => {
+            await resetOnboarding();
+            router.replace('/(onboarding)/step1-welcome');
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Close handle */}
+        <View style={styles.handleRow}>
+          <View style={styles.handle} />
+        </View>
+
         {/* Header Card */}
         <Card style={styles.headerCard}>
           <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>[Artie]</Text>
+            <Text style={styles.avatarText}>
+              {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
+            </Text>
           </View>
           <Text style={styles.userName}>{user?.name || 'User'}</Text>
           <Badge label={artieModeName} />
@@ -109,6 +137,12 @@ export default function ProfileScreen() {
             icon="sun"
             label="Appearance"
             value="Light Mode"
+          />
+          <View style={styles.divider} />
+          <SettingsRow
+            icon="refresh-cw"
+            label="Re-run Onboarding"
+            onPress={handleRerunOnboarding}
           />
         </Card>
 
@@ -178,9 +212,19 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   } as ViewStyle,
   scrollContent: {
-    padding: Spacing.xxl,
+    padding: Spacing.lg,
     paddingBottom: Spacing.huge,
     gap: Spacing.lg,
+  } as ViewStyle,
+  handleRow: {
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+  } as ViewStyle,
+  handle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: Colors.border,
   } as ViewStyle,
   headerCard: {
     alignItems: 'center',
@@ -194,15 +238,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryLight,
     borderWidth: 2,
     borderColor: Colors.primary,
-    borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
   } as ViewStyle,
   avatarText: {
-    fontFamily: Fonts.body,
-    fontSize: 9,
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: 24,
     color: Colors.primary,
-    textAlign: 'center',
   } as TextStyle,
   userName: {
     fontFamily: Fonts.headingBold,

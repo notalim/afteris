@@ -3,16 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
-import {
-  PlayfairDisplay_400Regular,
-  PlayfairDisplay_700Bold,
-} from '@expo-google-fonts/playfair-display';
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-} from '@expo-google-fonts/inter';
+import { InstrumentSerif_400Regular } from '@expo-google-fonts/instrument-serif';
 import { initializeDatabase } from '@/db/schema';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 import { useState } from 'react';
@@ -24,12 +15,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    PlayfairDisplay_400Regular,
-    PlayfairDisplay_700Bold,
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
+    InstrumentSerif_400Regular,
   });
 
   const [dbReady, setDbReady] = useState(false);
@@ -114,6 +100,7 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(onboarding)" />
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="profile-modal" options={{ presentation: 'modal', headerShown: false }} />
     </Stack>
   );
 }

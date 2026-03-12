@@ -1,69 +1,54 @@
 import { Tabs } from 'expo-router';
+import { StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { Colors, Fonts } from '@/constants/theme';
+import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors } from '@/constants/theme';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textSecondary,
+        tabBarShowLabel: false,
         tabBarStyle: {
-          backgroundColor: Colors.background,
-          borderTopColor: Colors.border,
-          borderTopWidth: 1,
-          paddingBottom: 4,
-          height: 56,
+          position: 'absolute',
+          borderTopWidth: 0,
+          backgroundColor: 'transparent',
+          elevation: 0,
+          height: 50 + insets.bottom,
+          paddingBottom: insets.bottom,
         },
-        tabBarLabelStyle: {
-          fontFamily: Fonts.bodyMedium,
-          fontSize: 11,
-        },
+        tabBarBackground: () => (
+          <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />
+        ),
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="calendar"
+        name="protocol"
         options={{
-          title: 'Calendar',
           tabBarIcon: ({ color, size }) => (
-            <Feather name="calendar" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="calculator"
-        options={{
-          title: 'Calculator',
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="sliders" size={size} color={color} />
+            <Feather name="clipboard" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="hub"
         options={{
-          title: 'Hub',
           tabBarIcon: ({ color, size }) => (
             <Feather name="book-open" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="user" size={size} color={color} />
           ),
         }}
       />

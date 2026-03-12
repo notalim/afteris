@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   ViewStyle,
   TextStyle,
 } from 'react-native';
@@ -34,8 +35,10 @@ export function LogModal({ visible, compound, onClose, onSubmit }: LogModalProps
   const [dose, setDose] = useState('');
   const [site, setSite] = useState('Abdomen');
   const [notes, setNotes] = useState('');
+  const submittingRef = useRef(false);
 
   const handleOpen = () => {
+    submittingRef.current = false;
     if (compound) {
       setDose(compound.dose_mcg ? String(compound.dose_mcg) : '');
       setSite('Abdomen');
@@ -44,10 +47,12 @@ export function LogModal({ visible, compound, onClose, onSubmit }: LogModalProps
   };
 
   const handleSubmit = () => {
+    if (submittingRef.current) return;
     if (!compound) return;
     const doseNum = parseFloat(dose);
     if (isNaN(doseNum) || doseNum <= 0) return;
 
+    submittingRef.current = true;
     onSubmit({
       compound_id: compound.id,
       dose_mcg: doseNum,
@@ -59,7 +64,7 @@ export function LogModal({ visible, compound, onClose, onSubmit }: LogModalProps
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType="none"
       transparent
       onRequestClose={onClose}
       onShow={handleOpen}
@@ -67,6 +72,7 @@ export function LogModal({ visible, compound, onClose, onSubmit }: LogModalProps
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={80}
       >
         <View style={styles.sheet}>
           <View style={styles.header}>
@@ -78,41 +84,43 @@ export function LogModal({ visible, compound, onClose, onSubmit }: LogModalProps
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.label}>Dose (mcg)</Text>
-          <TextInput
-            style={styles.input}
-            value={dose}
-            onChangeText={setDose}
-            keyboardType="numeric"
-            placeholder="e.g. 250"
-            placeholderTextColor={Colors.textSecondary}
-          />
+          <ScrollView keyboardShouldPersistTaps="handled" style={styles.scrollArea}>
+            <Text style={styles.label}>Dose (mcg)</Text>
+            <TextInput
+              style={styles.input}
+              value={dose}
+              onChangeText={setDose}
+              keyboardType="numeric"
+              placeholder="e.g. 250"
+              placeholderTextColor={Colors.textSecondary}
+            />
 
-          <Text style={styles.label}>Injection Site</Text>
-          <View style={styles.siteRow}>
-            {INJECTION_SITES.map((s) => (
-              <TouchableOpacity
-                key={s}
-                onPress={() => setSite(s)}
-                activeOpacity={0.7}
-                style={[styles.sitePill, site === s && styles.sitePillSelected]}
-              >
-                <Text style={[styles.siteText, site === s && styles.siteTextSelected]}>
-                  {s}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+            <Text style={styles.label}>Injection Site</Text>
+            <View style={styles.siteRow}>
+              {INJECTION_SITES.map((s) => (
+                <TouchableOpacity
+                  key={s}
+                  onPress={() => setSite(s)}
+                  activeOpacity={0.7}
+                  style={[styles.sitePill, site === s && styles.sitePillSelected]}
+                >
+                  <Text style={[styles.siteText, site === s && styles.siteTextSelected]}>
+                    {s}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
-          <Text style={styles.label}>Notes (optional)</Text>
-          <TextInput
-            style={[styles.input, styles.notesInput]}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Any observations..."
-            placeholderTextColor={Colors.textSecondary}
-            multiline
-          />
+            <Text style={styles.label}>Notes (optional)</Text>
+            <TextInput
+              style={[styles.input, styles.notesInput]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Any observations..."
+              placeholderTextColor={Colors.textSecondary}
+              multiline
+            />
+          </ScrollView>
 
           <Button
             title="Mark as Done ✓"
@@ -129,7 +137,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.25)',
   } as ViewStyle,
   sheet: {
     backgroundColor: Colors.background,
@@ -138,6 +146,10 @@ const styles = StyleSheet.create({
     padding: Spacing.xxl,
     paddingBottom: Spacing.huge,
     gap: Spacing.md,
+    maxHeight: '80%',
+  } as ViewStyle,
+  scrollArea: {
+    flexGrow: 0,
   } as ViewStyle,
   header: {
     flexDirection: 'row',

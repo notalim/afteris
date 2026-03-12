@@ -46,7 +46,7 @@ export function DayDetailModal({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType="none"
       transparent
       onRequestClose={onClose}
     >
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.25)',
   } as ViewStyle,
   sheet: {
     backgroundColor: Colors.background,

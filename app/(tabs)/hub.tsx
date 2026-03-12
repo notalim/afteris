@@ -13,7 +13,6 @@ import { useFocusEffect } from 'expo-router';
 import { Colors, Fonts, Spacing, BorderRadius, Typography } from '@/constants/theme';
 import { articles } from '@/constants/articles';
 import { toggleBookmark, getBookmarks } from '@/db/queries';
-import { FadeIn } from '@/components/ui/FadeIn';
 import { ArticleCard } from '@/components/hub/ArticleCard';
 import { CategoryPill } from '@/components/hub/CategoryPill';
 import { SafetyBanner } from '@/components/hub/SafetyBanner';
@@ -97,11 +96,12 @@ export default function HubScreen() {
           <Text style={styles.readNow}>Read Now →</Text>
         </TouchableOpacity>
 
-        {/* Category Pills */}
+        {/* Category Pills — edge-to-edge scroll */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.pillRow}
+          style={styles.pillScroll}
+          contentContainerStyle={styles.pillScrollContent}
         >
           {CATEGORIES.map((cat) => (
             <CategoryPill
@@ -114,22 +114,23 @@ export default function HubScreen() {
         </ScrollView>
 
         {/* Article Grid */}
-        <FadeIn delay={100}>
-          <View style={styles.grid}>
-            {filteredArticles.map((article) => (
-              <ArticleCard
-                key={article.slug}
-                article={article}
-                bookmarked={bookmarkedSlugs.has(article.slug)}
-                onPress={() => openDetail(article)}
-                onToggleBookmark={() => handleToggleBookmark(article.slug)}
-              />
-            ))}
-          </View>
-        </FadeIn>
+        <View style={styles.grid}>
+          {filteredArticles.map((article) => (
+            <ArticleCard
+              key={article.slug}
+              article={article}
+              bookmarked={bookmarkedSlugs.has(article.slug)}
+              onPress={() => openDetail(article)}
+              onToggleBookmark={() => handleToggleBookmark(article.slug)}
+            />
+          ))}
+        </View>
 
         {/* Safety Banner */}
         <SafetyBanner />
+
+        {/* Tab bar spacer */}
+        <View style={styles.tabBarSpacer} />
       </ScrollView>
 
       <ArticleDetailModal
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   } as ViewStyle,
   scrollContent: {
-    padding: Spacing.xxl,
+    padding: Spacing.lg,
     paddingBottom: Spacing.huge,
   } as ViewStyle,
   headerRow: {
@@ -212,14 +213,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.primary,
   } as TextStyle,
-  pillRow: {
-    gap: Spacing.sm,
+  pillScroll: {
+    marginHorizontal: -Spacing.lg,
     marginBottom: Spacing.xl,
+  } as ViewStyle,
+  pillScrollContent: {
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.sm,
   } as ViewStyle,
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: Spacing.xxl,
+  } as ViewStyle,
+  tabBarSpacer: {
+    height: 80,
   } as ViewStyle,
 });

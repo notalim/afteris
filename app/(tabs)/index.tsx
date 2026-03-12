@@ -5,10 +5,11 @@ import { useFocusEffect } from 'expo-router';
 import { Colors, Fonts, Spacing, Typography } from '@/constants/theme';
 import { Card } from '@/components/ui/Card';
 import { MascotBlock } from '@/components/ui/MascotBlock';
-import { StreakBadge } from '@/components/dashboard/StreakBadge';
+import { ProfileButton } from '@/components/dashboard/ProfileButton';
+import { StreakChart } from '@/components/charts/StreakChart';
+import { DecayCurve } from '@/components/charts/DecayCurve';
 import { UpcomingCard } from '@/components/dashboard/UpcomingCard';
 import { LogModal } from '@/components/dashboard/LogModal';
-import { FadeIn } from '@/components/ui/FadeIn';
 import { useProtocol } from '@/hooks/useProtocol';
 import { useInjectionLog } from '@/hooks/useInjectionLog';
 import { getUser } from '@/db/queries';
@@ -33,11 +34,12 @@ function getTipOfTheDay(mode: ArtieMode): string {
 
 export default function DashboardScreen() {
   const { compounds, refresh: refreshCompounds } = useProtocol();
-  const { streak, log, refreshStreak } = useInjectionLog();
+  const { streak, log, refreshStreak, fetchBetweenDates } = useInjectionLog();
   const [userName, setUserName] = useState('');
   const [artieMode, setArtieMode] = useState<ArtieMode>('calm');
   const [logModalVisible, setLogModalVisible] = useState(false);
   const [selectedCompound, setSelectedCompound] = useState<Compound | null>(null);
+  const [weekData, setWeekData] = useState<boolean[]>([false, false, false, false, false, false, false]);
 
   const loadUser = useCallback(async () => {
     const user = await getUser();
@@ -47,12 +49,26 @@ export default function DashboardScreen() {
     }
   }, []);
 
+  const loadWeekData = useCallback(async () => {
+    const today = new Date();
+    const days: boolean[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const logs = await fetchBetweenDates(dateStr, dateStr);
+      days.push((logs?.length ?? 0) > 0);
+    }
+    setWeekData(days);
+  }, [fetchBetweenDates]);
+
   useFocusEffect(
     useCallback(() => {
       loadUser();
       refreshCompounds();
       refreshStreak();
-    }, [loadUser, refreshCompounds, refreshStreak])
+      loadWeekData();
+    }, [loadUser, refreshCompounds, refreshStreak, loadWeekData])
   );
 
   const greeting = useMemo(() => getGreeting(), []);
@@ -80,18 +96,24 @@ export default function DashboardScreen() {
     setLogModalVisible(false);
     setSelectedCompound(null);
     refreshStreak();
+    loadWeekData();
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <FadeIn>
-        <Text style={styles.greeting}>
-          {greeting}, {userName || 'friend'}. {'\u{1F9E1}'}
-        </Text>
+        {/* Header row with greeting + profile button */}
+        <View style={styles.headerRow}>
+          <Text style={styles.greeting}>
+            {greeting}, {userName || 'friend'}.
+          </Text>
+          <ProfileButton initial={userName ? userName.charAt(0).toUpperCase() : '?'} />
+        </View>
 
-        <StreakBadge streak={streak} />
+        {/* Streak Chart */}
+        <StreakChart dayData={weekData} streak={streak} />
 
+        {/* Today's Schedule */}
         <Text style={styles.sectionTitle}>Today's Schedule</Text>
         {compounds.length === 0 ? (
           <Text style={styles.emptyText}>
@@ -107,9 +129,11 @@ export default function DashboardScreen() {
               <UpcomingCard compound={item} onLog={handleLogPress} />
             )}
             style={styles.scheduleList}
+            contentContainerStyle={styles.scheduleListContent}
           />
         )}
 
+        {/* Active Compounds */}
         <Text style={styles.sectionTitle}>Active Compounds</Text>
         {compounds.length === 0 ? (
           <Text style={styles.emptyText}>No active compounds.</Text>
@@ -128,16 +152,22 @@ export default function DashboardScreen() {
                     </Text>
                   ) : null}
                 </View>
-                <View style={styles.halfLifePlaceholder}>
-                  <Text style={styles.halfLifeText}>[Chart]</Text>
-                </View>
+                {c.half_life_hours ? (
+                  <DecayCurve halfLifeHours={c.half_life_hours} />
+                ) : (
+                  <View style={styles.halfLifePlaceholder}>
+                    <Text style={styles.halfLifeText}>N/A</Text>
+                  </View>
+                )}
               </View>
             </Card>
           ))
         )}
 
         <MascotBlock text={dailyTip} />
-        </FadeIn>
+
+        {/* Tab bar spacer */}
+        <View style={styles.tabBarSpacer} />
       </ScrollView>
 
       <LogModal
@@ -159,13 +189,19 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   } as ViewStyle,
   scroll: {
-    padding: Spacing.xxl,
+    padding: Spacing.lg,
     gap: Spacing.lg,
+  } as ViewStyle,
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   } as ViewStyle,
   greeting: {
     ...Typography.h1,
     fontSize: 26,
     lineHeight: 34,
+    flex: 1,
   } as TextStyle,
   sectionTitle: {
     fontFamily: Fonts.headingBold,
@@ -178,8 +214,10 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   } as TextStyle,
   scheduleList: {
-    marginHorizontal: -Spacing.xxl,
-    paddingHorizontal: Spacing.xxl,
+    marginHorizontal: -Spacing.lg,
+  } as ViewStyle,
+  scheduleListContent: {
+    paddingHorizontal: Spacing.lg,
   } as ViewStyle,
   compoundCard: {
     marginBottom: Spacing.sm,
@@ -203,8 +241,8 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   } as TextStyle,
   halfLifePlaceholder: {
-    width: 60,
-    height: 40,
+    width: 64,
+    height: 36,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -218,4 +256,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: Colors.primary,
   } as TextStyle,
+  tabBarSpacer: {
+    height: 80,
+  } as ViewStyle,
 });

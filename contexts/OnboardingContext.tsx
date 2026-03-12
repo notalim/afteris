@@ -7,12 +7,14 @@ interface OnboardingContextType {
   hasCompletedOnboarding: boolean | null;
   completeOnboarding: () => Promise<void>;
   skipToApp: () => Promise<void>;
+  resetOnboarding: () => Promise<void>;
 }
 
 const OnboardingContext = createContext<OnboardingContextType>({
   hasCompletedOnboarding: null,
   completeOnboarding: async () => {},
   skipToApp: async () => {},
+  resetOnboarding: async () => {},
 });
 
 export function useOnboarding() {
@@ -44,9 +46,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setHasCompletedOnboarding(true);
   }, []);
 
+  const resetOnboarding = useCallback(async () => {
+    await AsyncStorage.removeItem(ONBOARDING_KEY);
+    setHasCompletedOnboarding(false);
+  }, []);
+
   return (
     <OnboardingContext.Provider
-      value={{ hasCompletedOnboarding, completeOnboarding, skipToApp }}
+      value={{ hasCompletedOnboarding, completeOnboarding, skipToApp, resetOnboarding }}
     >
       {children}
     </OnboardingContext.Provider>

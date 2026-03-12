@@ -14,12 +14,12 @@ export const Colors = {
 } as const;
 
 export const Fonts = {
-  heading: 'PlayfairDisplay_400Regular',
-  headingBold: 'PlayfairDisplay_700Bold',
-  body: 'Inter_400Regular',
-  bodyMedium: 'Inter_500Medium',
-  bodySemiBold: 'Inter_600SemiBold',
-  bodyBold: 'Inter_700Bold',
+  heading: 'InstrumentSerif_400Regular',
+  headingBold: 'InstrumentSerif_400Regular',
+  body: 'HelveticaNeue',
+  bodyMedium: 'HelveticaNeue-Medium',
+  bodySemiBold: 'HelveticaNeue-Medium',
+  bodyBold: 'HelveticaNeue-Bold',
 } as const;
 
 export const Spacing = {

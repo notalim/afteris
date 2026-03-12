@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -44,8 +44,10 @@ export function CalendarLogModal({
   const [dose, setDose] = useState('');
   const [site, setSite] = useState('Abdomen');
   const [notes, setNotes] = useState('');
+  const submittingRef = useRef(false);
 
   const handleOpen = () => {
+    submittingRef.current = false;
     setSelectedCompound(compounds.length > 0 ? compounds[0].id : null);
     setDose(compounds.length > 0 && compounds[0].dose_mcg ? String(compounds[0].dose_mcg) : '');
     setSite('Abdomen');
@@ -62,10 +64,12 @@ export function CalendarLogModal({
   const isLateLog = date < today ? 1 : 0;
 
   const handleSubmit = () => {
+    if (submittingRef.current) return;
     if (!selectedCompound) return;
     const doseNum = parseFloat(dose);
     if (isNaN(doseNum) || doseNum <= 0) return;
 
+    submittingRef.current = true;
     onSubmit({
       compound_id: selectedCompound,
       dose_mcg: doseNum,
@@ -85,7 +89,7 @@ export function CalendarLogModal({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType="none"
       transparent
       onRequestClose={onClose}
       onShow={handleOpen}
@@ -93,6 +97,7 @@ export function CalendarLogModal({
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={80}
       >
         <View style={styles.sheet}>
           <View style={styles.header}>
@@ -181,7 +186,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.25)',
   } as ViewStyle,
   sheet: {
     backgroundColor: Colors.background,
