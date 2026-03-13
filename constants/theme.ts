@@ -50,19 +50,19 @@ export const Shadow: ViewStyle = {
 
 export const Typography = {
   h1: {
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.heading,
     fontSize: 28,
     lineHeight: 36,
     color: Colors.textPrimary,
   } as TextStyle,
   h2: {
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.bodyBold,
     fontSize: 22,
     lineHeight: 28,
     color: Colors.textPrimary,
   } as TextStyle,
   h3: {
-    fontFamily: Fonts.heading,
+    fontFamily: Fonts.bodySemiBold,
     fontSize: 18,
     lineHeight: 24,
     color: Colors.textPrimary,

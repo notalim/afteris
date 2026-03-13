@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { Colors, Fonts, Spacing, Typography } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
 import { useOnboarding } from '@/contexts/OnboardingContext';
-import { getUser, createUser, updateUser } from '@/db/queries';
+import { getUser, createUser, updateUser, seedDemoData } from '@/db/queries';
 
 export default function Step1Welcome() {
   const router = useRouter();
@@ -26,6 +26,8 @@ export default function Step1Welcome() {
         reminder_time: '09:00',
         has_completed_onboarding: 1,
       });
+      // Seed demo data for heatmap and dashboard
+      await seedDemoData();
       // Update context + AsyncStorage, which triggers the routing guard
       await skipToApp();
     } catch (e) {

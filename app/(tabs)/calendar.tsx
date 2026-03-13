@@ -188,7 +188,7 @@ export default function CalendarScreen() {
     () => ({
       calendarBackground: Colors.background,
       textDayFontFamily: Fonts.body,
-      textMonthFontFamily: Fonts.headingBold,
+      textMonthFontFamily: Fonts.bodyBold,
       textDayHeaderFontFamily: Fonts.bodySemiBold,
       textDayFontSize: 15,
       textMonthFontSize: 18,

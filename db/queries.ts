@@ -211,3 +211,76 @@ export async function getSavedConcentrations(): Promise<SavedConcentration[]> {
     'SELECT * FROM saved_concentrations ORDER BY saved_at DESC'
   );
 }
+
+// ─── Demo Data Seeding ──────────────────────────────────
+
+export async function seedDemoData(): Promise<void> {
+  const db = await getDatabase();
+
+  // Check if we already have compounds — don't double-seed
+  const existing = await db.getFirstAsync<{ cnt: number }>(
+    'SELECT COUNT(*) as cnt FROM compounds'
+  );
+  if (existing && existing.cnt > 0) return;
+
+  // Sample compounds
+  const compounds = [
+    { name: 'BPC-157', dose_mcg: 250, frequency: 'Daily', half_life_hours: 4, vial_size_mg: 5, bac_water_ml: 2 },
+    { name: 'TB-500', dose_mcg: 2500, frequency: 'Twice weekly', half_life_hours: 72, vial_size_mg: 5, bac_water_ml: 2 },
+    { name: 'Ipamorelin', dose_mcg: 200, frequency: 'Daily', half_life_hours: 2, vial_size_mg: 5, bac_water_ml: 2.5 },
+    { name: 'CJC-1295', dose_mcg: 100, frequency: 'Every other day', half_life_hours: 144, vial_size_mg: 2, bac_water_ml: 2 },
+  ];
+
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - 60);
+  const startDateStr = startDate.toISOString().split('T')[0];
+
+  const compoundIds: number[] = [];
+  for (const c of compounds) {
+    const result = await db.runAsync(
+      `INSERT INTO compounds (name, dose_mcg, frequency, start_date, active, vial_size_mg, bac_water_ml, half_life_hours, notes)
+       VALUES (?, ?, ?, ?, 1, ?, ?, ?, '')`,
+      c.name,
+      c.dose_mcg,
+      c.frequency,
+      startDateStr,
+      c.vial_size_mg,
+      c.bac_water_ml,
+      c.half_life_hours
+    );
+    compoundIds.push(result.lastInsertRowId);
+  }
+
+  // Generate ~60 days of random injection logs
+  const sites = ['Abdomen', 'Thigh', 'Deltoid', 'Glute'];
+  for (let dayOffset = 60; dayOffset >= 0; dayOffset--) {
+    const logDate = new Date(today);
+    logDate.setDate(logDate.getDate() - dayOffset);
+    const dateStr = logDate.toISOString().split('T')[0];
+
+    // Randomly decide how many logs this day (0-3)
+    const rand = Math.random();
+    let numLogs = 0;
+    if (rand < 0.15) numLogs = 0;       // 15% skip day
+    else if (rand < 0.45) numLogs = 1;  // 30% one log
+    else if (rand < 0.80) numLogs = 2;  // 35% two logs
+    else numLogs = 3;                    // 20% three logs
+
+    for (let i = 0; i < numLogs; i++) {
+      const compoundIdx = Math.floor(Math.random() * compoundIds.length);
+      const site = sites[Math.floor(Math.random() * sites.length)];
+      const compId = compoundIds[compoundIdx];
+      const comp = compounds[compoundIdx];
+
+      await db.runAsync(
+        'INSERT INTO injection_log (compound_id, logged_at, dose_mcg, site, is_late_log, notes) VALUES (?, ?, ?, ?, 0, ?)',
+        compId,
+        dateStr + 'T09:00:00',
+        comp.dose_mcg,
+        site,
+        ''
+      );
+    }
+  }
+}

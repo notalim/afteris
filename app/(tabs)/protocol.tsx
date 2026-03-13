@@ -199,7 +199,7 @@ export default function ProtocolScreen() {
     () => ({
       calendarBackground: Colors.background,
       textDayFontFamily: Fonts.body,
-      textMonthFontFamily: Fonts.headingBold,
+      textMonthFontFamily: Fonts.bodyBold,
       textDayHeaderFontFamily: Fonts.bodySemiBold,
       textDayFontSize: 15,
       textMonthFontSize: 18,
@@ -720,6 +720,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xxl,
   } as TextStyle,
   tabBarSpacer: {
-    height: 80,
+    height: 20,
   } as ViewStyle,
 });

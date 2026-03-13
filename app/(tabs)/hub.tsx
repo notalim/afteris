@@ -76,9 +76,6 @@ export default function HubScreen() {
         {/* Header */}
         <View style={styles.headerRow}>
           <Text style={styles.title}>The Afteris Hub</Text>
-          <View style={styles.miniArtie}>
-            <Text style={styles.miniArtieText}>[A]</Text>
-          </View>
         </View>
 
         {/* Featured Banner */}
@@ -164,22 +161,7 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.h1,
   } as TextStyle,
-  miniArtie: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.primaryLight,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-  } as ViewStyle,
-  miniArtieText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: 12,
-    color: Colors.primary,
-  } as TextStyle,
+
   featuredCard: {
     backgroundColor: Colors.primaryLight,
     borderRadius: BorderRadius.card,
@@ -203,7 +185,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   } as TextStyle,
   featuredTitle: {
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.bodyBold,
     fontSize: 18,
     lineHeight: 24,
     color: Colors.textPrimary,
@@ -228,6 +210,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xxl,
   } as ViewStyle,
   tabBarSpacer: {
-    height: 80,
+    height: 20,
   } as ViewStyle,
 });

@@ -89,7 +89,7 @@ export function CalendarLogModal({
   return (
     <Modal
       visible={visible}
-      animationType="none"
+      animationType="fade"
       transparent
       onRequestClose={onClose}
       onShow={handleOpen}
@@ -172,7 +172,7 @@ export function CalendarLogModal({
           </ScrollView>
 
           <Button
-            title={isLateLog ? 'Log Late Entry ✓' : 'Mark as Done ✓'}
+            title={isLateLog ? 'Log Late Entry' : 'Log Injection'}
             onPress={handleSubmit}
             disabled={!selectedCompound || !dose || parseFloat(dose) <= 0}
           />

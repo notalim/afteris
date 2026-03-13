@@ -14,8 +14,6 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, BorderRadius, Typography } from '@/constants/theme';
 import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { MascotBlock } from '@/components/ui/MascotBlock';
 import { SettingsRow } from '@/components/profile/SettingsRow';
 import { getUser, getCompounds, getStreak } from '@/db/queries';
 import { useInjectionLog } from '@/hooks/useInjectionLog';
@@ -48,13 +46,6 @@ export default function ProfileModal() {
       })();
     }, [fetchBetweenDates]),
   );
-
-  const artieModeName =
-    user?.artie_mode === 'hype'
-      ? 'Hype'
-      : user?.artie_mode === 'nerdy'
-        ? 'Nerdy'
-        : 'Calm';
 
   const handleRerunOnboarding = () => {
     Alert.alert(
@@ -89,7 +80,6 @@ export default function ProfileModal() {
             </Text>
           </View>
           <Text style={styles.userName}>{user?.name || 'User'}</Text>
-          <Badge label={artieModeName} />
         </Card>
 
         {/* Stats Row */}
@@ -120,13 +110,6 @@ export default function ProfileModal() {
         <Card style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Preferences</Text>
           <SettingsRow
-            icon="smile"
-            label="Artie Personality"
-            value={artieModeName}
-            onPress={() => {}}
-          />
-          <View style={styles.divider} />
-          <SettingsRow
             icon="bell"
             label="Notifications"
             value={user?.reminder_time ?? '09:00'}
@@ -134,15 +117,46 @@ export default function ProfileModal() {
           />
           <View style={styles.divider} />
           <SettingsRow
-            icon="sun"
-            label="Appearance"
-            value="Light Mode"
-          />
-          <View style={styles.divider} />
-          <SettingsRow
             icon="refresh-cw"
             label="Re-run Onboarding"
             onPress={handleRerunOnboarding}
+          />
+        </Card>
+
+        {/* Integrations Section */}
+        <Card style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Integrations</Text>
+          <SettingsRow
+            icon="heart"
+            label="Apple Health"
+            onPress={() =>
+              Alert.alert(
+                'Apple Health',
+                'Apple Health integration will be available in the production build. It requires a custom build to access HealthKit.',
+              )
+            }
+          />
+          <View style={styles.divider} />
+          <SettingsRow
+            icon="share-2"
+            label="Refer a Friend"
+            onPress={() =>
+              Alert.alert(
+                'Referral Program',
+                'The referral program is coming soon. You\'ll be able to earn free Pro months by inviting friends.',
+              )
+            }
+          />
+          <View style={styles.divider} />
+          <SettingsRow
+            icon="message-circle"
+            label="Join Discord"
+            onPress={() =>
+              Alert.alert(
+                'Discord Community',
+                'The Afteris Discord community is launching soon. Stay tuned for the invite link.',
+              )
+            }
           />
         </Card>
 
@@ -247,7 +261,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   } as TextStyle,
   userName: {
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.bodyBold,
     fontSize: 20,
     color: Colors.textPrimary,
   } as TextStyle,
@@ -262,7 +276,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
   } as ViewStyle,
   statNumber: {
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.bodyBold,
     fontSize: 24,
     color: Colors.textPrimary,
   } as TextStyle,

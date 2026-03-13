@@ -64,7 +64,7 @@ export function LogModal({ visible, compound, onClose, onSubmit }: LogModalProps
   return (
     <Modal
       visible={visible}
-      animationType="none"
+      animationType="fade"
       transparent
       onRequestClose={onClose}
       onShow={handleOpen}
@@ -123,7 +123,7 @@ export function LogModal({ visible, compound, onClose, onSubmit }: LogModalProps
           </ScrollView>
 
           <Button
-            title="Mark as Done ✓"
+            title="Log Injection"
             onPress={handleSubmit}
             disabled={!dose || parseFloat(dose) <= 0}
           />
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     padding: Spacing.xxl,
     paddingBottom: Spacing.huge,
-    gap: Spacing.md,
+    gap: Spacing.lg,
     maxHeight: '80%',
   } as ViewStyle,
   scrollArea: {

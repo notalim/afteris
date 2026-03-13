@@ -6,7 +6,7 @@ import { Colors, Fonts, Spacing, Typography } from '@/constants/theme';
 import { Card } from '@/components/ui/Card';
 import { MascotBlock } from '@/components/ui/MascotBlock';
 import { ProfileButton } from '@/components/dashboard/ProfileButton';
-import { StreakChart } from '@/components/charts/StreakChart';
+import { HeatmapChart } from '@/components/charts/HeatmapChart';
 import { DecayCurve } from '@/components/charts/DecayCurve';
 import { UpcomingCard } from '@/components/dashboard/UpcomingCard';
 import { LogModal } from '@/components/dashboard/LogModal';
@@ -39,7 +39,8 @@ export default function DashboardScreen() {
   const [artieMode, setArtieMode] = useState<ArtieMode>('calm');
   const [logModalVisible, setLogModalVisible] = useState(false);
   const [selectedCompound, setSelectedCompound] = useState<Compound | null>(null);
-  const [weekData, setWeekData] = useState<boolean[]>([false, false, false, false, false, false, false]);
+  const [heatmapData, setHeatmapData] = useState<Record<string, number>>({});
+  const [totalLogs, setTotalLogs] = useState(0);
 
   const loadUser = useCallback(async () => {
     const user = await getUser();
@@ -49,17 +50,26 @@ export default function DashboardScreen() {
     }
   }, []);
 
-  const loadWeekData = useCallback(async () => {
+  const loadHeatmapData = useCallback(async () => {
     const today = new Date();
-    const days: boolean[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      const logs = await fetchBetweenDates(dateStr, dateStr);
-      days.push((logs?.length ?? 0) > 0);
+    const start = new Date(today);
+    start.setDate(start.getDate() - 84); // 12 weeks
+    const startStr = start.toISOString().split('T')[0];
+    const endStr = today.toISOString().split('T')[0];
+    const logs = await fetchBetweenDates(startStr, endStr);
+    if (!logs) {
+      setHeatmapData({});
+      setTotalLogs(0);
+      return;
     }
-    setWeekData(days);
+
+    const counts: Record<string, number> = {};
+    logs.forEach((l) => {
+      const d = l.logged_at.split('T')[0];
+      counts[d] = (counts[d] ?? 0) + 1;
+    });
+    setHeatmapData(counts);
+    setTotalLogs(logs.length);
   }, [fetchBetweenDates]);
 
   useFocusEffect(
@@ -67,8 +77,8 @@ export default function DashboardScreen() {
       loadUser();
       refreshCompounds();
       refreshStreak();
-      loadWeekData();
-    }, [loadUser, refreshCompounds, refreshStreak, loadWeekData])
+      loadHeatmapData();
+    }, [loadUser, refreshCompounds, refreshStreak, loadHeatmapData])
   );
 
   const greeting = useMemo(() => getGreeting(), []);
@@ -96,7 +106,7 @@ export default function DashboardScreen() {
     setLogModalVisible(false);
     setSelectedCompound(null);
     refreshStreak();
-    loadWeekData();
+    loadHeatmapData();
   };
 
   return (
@@ -110,8 +120,8 @@ export default function DashboardScreen() {
           <ProfileButton initial={userName ? userName.charAt(0).toUpperCase() : '?'} />
         </View>
 
-        {/* Streak Chart */}
-        <StreakChart dayData={weekData} streak={streak} />
+        {/* Heatmap Chart */}
+        <HeatmapChart logCounts={heatmapData} streak={streak} totalLogs={totalLogs} />
 
         {/* Today's Schedule */}
         <Text style={styles.sectionTitle}>Today's Schedule</Text>
@@ -204,7 +214,7 @@ const styles = StyleSheet.create({
     flex: 1,
   } as TextStyle,
   sectionTitle: {
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.bodyBold,
     fontSize: 18,
     color: Colors.textPrimary,
     marginTop: Spacing.sm,
@@ -257,6 +267,6 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   } as TextStyle,
   tabBarSpacer: {
-    height: 80,
+    height: 20,
   } as ViewStyle,
 });

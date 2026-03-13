@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.bodyBold,
     color: Colors.textPrimary,
   },
   link: {

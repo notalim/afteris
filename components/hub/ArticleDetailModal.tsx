@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.huge,
   } as ViewStyle,
   title: {
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.bodyBold,
     fontSize: 24,
     lineHeight: 32,
     color: Colors.textPrimary,

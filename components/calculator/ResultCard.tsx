@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   } as ViewStyle,
   title: {
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.bodySemiBold,
     fontSize: 16,
     color: Colors.primary,
   } as TextStyle,

@@ -5,31 +5,37 @@ import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Colors, Fonts, Spacing, BorderRadius, Typography } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { MascotBlock } from '@/components/ui/MascotBlock';
 
 interface Testimonial {
+  initials: string;
+  color: string;
   name: string;
-  age: number;
+  handle: string;
   quote: string;
 }
 
 const TESTIMONIALS: Testimonial[] = [
   {
-    name: 'Marcus',
-    age: 34,
-    quote: 'Finally off the spreadsheet. Afteris just works.',
+    initials: 'MR',
+    color: '#5B8DEF',
+    name: 'Marcus R.',
+    handle: 'Peptide user, 8 months',
+    quote: 'Finally off the spreadsheet. Afteris just works — I actually remember my doses now.',
   },
   {
-    name: 'Priya',
-    age: 28,
-    quote: "The calculator alone is worth it. No more second-guessing.",
+    initials: 'PK',
+    color: '#E88B5A',
+    name: 'Priya K.',
+    handle: 'BPC-157 protocol',
+    quote: "The reconstitution calculator alone is worth it. No more second-guessing my draws.",
   },
   {
-    name: 'Jake',
-    age: 41,
-    quote: "Artie keeps me accountable. It's like having a tiny coach.",
+    initials: 'JT',
+    color: '#4CAF7D',
+    name: 'Jake T.',
+    handle: 'Running 3 compounds',
+    quote: "Tracking multiple peptides was a nightmare before. Now it takes 10 seconds.",
   },
 ];
 
@@ -46,22 +52,28 @@ export default function Step6Social() {
       </View>
 
       <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollInner}>
-        <Text style={styles.heading}>You're in good company.</Text>
+        <Text style={styles.heading}>Join 2,400+ users{'\n'}tracking their protocols.</Text>
 
-        {TESTIMONIALS.map((t) => (
-          <Card key={t.name} style={styles.testimonialCard}>
-            <Text style={styles.testimonialName}>
-              {t.name}, {t.age}
-            </Text>
-            <Text style={styles.testimonialQuote}>"{t.quote}"</Text>
-          </Card>
-        ))}
+        <View style={styles.testimonialList}>
+          {TESTIMONIALS.map((t) => (
+            <View key={t.name} style={styles.testimonialCard}>
+              <View style={styles.testimonialHeader}>
+                <View style={[styles.avatar, { backgroundColor: t.color }]}>
+                  <Text style={styles.avatarText}>{t.initials}</Text>
+                </View>
+                <View style={styles.testimonialMeta}>
+                  <Text style={styles.testimonialName}>{t.name}</Text>
+                  <Text style={styles.testimonialHandle}>{t.handle}</Text>
+                </View>
+              </View>
+              <Text style={styles.testimonialQuote}>"{t.quote}"</Text>
+            </View>
+          ))}
+        </View>
 
         <Text style={styles.stats}>
-          20+ compounds tracked {'  \u2022  '} Built for biohackers
+          20+ compounds tracked  {'\u2022'}  Built for biohackers
         </Text>
-
-        <MascotBlock text="Almost there! Here's what's waiting for you →" />
       </ScrollView>
 
       <View style={styles.footer}>
@@ -104,14 +116,48 @@ const styles = StyleSheet.create({
     ...Typography.h1,
     marginBottom: Spacing.xxl,
   },
+  testimonialList: {
+    gap: Spacing.md,
+    marginBottom: Spacing.xxl,
+  },
   testimonialCard: {
-    marginBottom: Spacing.md,
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.card,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.lg,
+    gap: Spacing.md,
+  },
+  testimonialHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: 14,
+    color: Colors.white,
+  },
+  testimonialMeta: {
+    flex: 1,
+    gap: 2,
   },
   testimonialName: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: 15,
     color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
+  },
+  testimonialHandle: {
+    fontFamily: Fonts.body,
+    fontSize: 12,
+    color: Colors.textSecondary,
   },
   testimonialQuote: {
     fontFamily: Fonts.body,
@@ -125,7 +171,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginVertical: Spacing.xxl,
   },
   footer: {
     paddingHorizontal: Spacing.xxl,

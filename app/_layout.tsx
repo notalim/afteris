@@ -11,7 +11,9 @@ import 'react-native-reanimated';
 
 export { ErrorBoundary } from 'expo-router';
 
-SplashScreen.preventAutoHideAsync();
+try {
+  SplashScreen.preventAutoHideAsync();
+} catch {}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -84,7 +86,11 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (hasCompletedOnboarding !== null) {
-      SplashScreen.hideAsync();
+      try {
+        SplashScreen.hideAsync();
+      } catch (e) {
+        // Silently ignore — splash screen may not be registered in Expo Go
+      }
     }
   }, [hasCompletedOnboarding]);
 

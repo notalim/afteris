@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   } as TextStyle,
   title: {
-    fontFamily: Fonts.headingBold,
+    fontFamily: Fonts.bodySemiBold,
     fontSize: 14,
     lineHeight: 19,
     color: Colors.textPrimary,
